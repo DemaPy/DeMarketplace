@@ -1,4 +1,4 @@
-import { getPayloadClient } from "@/get-payload";
+import { getPayloadClient } from "../get-payload";
 import { authRouter } from "./auth";
 import { publicProcedure, router } from "./trpc";
 import { z } from "zod";

@@ -10,8 +10,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Auth, AuthForm } from "@/lib/validators/account-credentials";
 import { trpc } from "@/trpc/client";
+import { toast } from "sonner";
+import { ZodError } from "zod";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -20,7 +24,27 @@ const Page = () => {
     resolver: zodResolver(AuthForm),
   });
 
-  const { mutate, isLoading } = trpc.auth.createUser.useMutation({});
+  const { mutate, isLoading } = trpc.auth.createUser.useMutation({
+    onError: (err) => {
+      if (err.data?.code === "CONFLICT") {
+        toast.error("This email is already in use. Sign in instead?");
+
+        return;
+      }
+
+      if (err instanceof ZodError) {
+        toast.error(err.issues[0].message);
+
+        return;
+      }
+
+      toast.error("Something went wrong. Try again.");
+    },
+    onSuccess: ({ sentToEmail }) => {
+      toast.success(`Verification email sent to ${sentToEmail}.`);
+      router.push("/verify-email?to=" + sentToEmail);
+    },
+  });
 
   const onSubmit = ({ email, password }: Auth) => {
     mutate({ email, password });
@@ -55,6 +79,9 @@ const Page = () => {
                   })}
                   placeholder="enter email"
                 />
+                {errors?.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
               </div>
               <div className="grid gap-2 py-2">
                 <Label htmlFor="password">Password</Label>
@@ -67,6 +94,11 @@ const Page = () => {
                   })}
                   placeholder="enter password"
                 />
+                {errors?.password && (
+                  <p className="text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
               <Button>Sign up</Button>

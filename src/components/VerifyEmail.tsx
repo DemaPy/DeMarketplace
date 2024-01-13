@@ -42,7 +42,7 @@ const VerifyEmail = ({ token }: { token: string }) => {
         <Link
           href={"/sign-in"}
           className={buttonVariants({ variant: "ghost", className: "mt-4" })}
-        ></Link>
+        >Sign in</Link>
       </div>
     );
   }

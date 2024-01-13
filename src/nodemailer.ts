@@ -6,7 +6,7 @@ export const transporter = nodemailer.createTransport({
     port: 465,
     auth: {
       user: "resend",
-      pass: process.env.RESEND
+      pass: "re_G59KWn26_9dXN34tqKo2jUtx1KcnGLwcX"
     }
   })
   
