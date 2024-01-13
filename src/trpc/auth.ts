@@ -8,7 +8,7 @@ export const authRouter = router({
     .input(AuthForm)
     .mutation(async ({ ctx, input }) => {
       const { email, password } = input;
-
+      
       const payload = await getPayloadClient();
       // check if user exist
       const { docs: users } = await payload.find({
@@ -21,6 +21,8 @@ export const authRouter = router({
       });
 
       if (users.length !== 0) {
+        // TODO
+        console.error("Already have an account")
         throw new TRPCError({ code: "CONFLICT" })
       }
 

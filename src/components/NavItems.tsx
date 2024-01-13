@@ -12,8 +12,6 @@ const NavItems = () => {
 
   useEffect(() => {
     const handleEscClick = (e: KeyboardEvent) => {
-        console.log(e.key);
-        
       if (e.key === "Escape") {
         setIdx(null);
       }

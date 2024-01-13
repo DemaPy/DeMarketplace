@@ -2,7 +2,13 @@ import { CollectionConfig } from "payload/types";
 
 const Users: CollectionConfig = {
   slug: "users",
-  auth: true,
+  auth: {
+    verify: {
+      generateEmailHTML: ({ token }) => {
+        return `Hi, please <a href="${process.env.NEXT_PUBLIC_SERVER_URL}/verify-email?token=${token}">verify email</a>.`
+      },
+    }
+  },
   access: {
     read: () => true,
     create: () => true,
