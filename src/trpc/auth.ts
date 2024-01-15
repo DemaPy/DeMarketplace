@@ -9,9 +9,9 @@ export const authRouter = router({
     .input(AuthForm)
     .mutation(async ({ ctx, input }) => {
       const { email, password } = input;
-
+      const { req, res } = ctx;
       const payload = await getPayloadClient();
-      
+
       try {
         await payload.login({
           collection: "users",
@@ -19,11 +19,13 @@ export const authRouter = router({
             email,
             password,
           },
+          res,
         });
-      } catch (error) {
-        
-      }
 
+        return { success: true };
+      } catch (error) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
 
       return { success: true, sentToEmail: email };
     }),

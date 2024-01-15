@@ -11,13 +11,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Auth, AuthForm } from "@/lib/validators/account-credentials";
 import { trpc } from "@/trpc/client";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 const Page = () => {
+  const params = useSearchParams();
+  const router = useRouter();
+  const isSeller = params.get("as") === "seller";
+  const origin = params.get("origin");
 
-  const params = useSearchParams()
-  const router = useRouter()
-  const isSeller = params.get("as") === "seller"
-  const origin = params.get("origin")
+  const asSeller = () => {
+    router.push("?as=seller");
+  };
+
+  const asBuyer = () => {
+    router.replace("/sign-in", undefined);
+  };
 
   const {
     register,
@@ -27,10 +35,32 @@ const Page = () => {
     resolver: zodResolver(AuthForm),
   });
 
-  const { mutate, isLoading } = trpc.auth.loginUser.useMutation({});
+  const { mutate: signIn, isLoading } = trpc.auth.loginUser.useMutation({
+    onSuccess: () => {
+      toast.success("Signed in succesfully.");
+
+      router.refresh();
+
+      if (origin) {
+        router.push(`/${origin}`);
+      }
+
+      if (isSeller) {
+        router.push(`/sell`);
+        return;
+      }
+
+      router.push("/");
+    },
+    onError: (err) => {
+      if (err.data?.code === "UNAUTHORIZED") {
+        toast.error("Invalid email or password");
+      }
+    },
+  });
 
   const onSubmit = ({ email, password }: Auth) => {
-    mutate({ email, password });
+    signIn({ email, password });
   };
 
   return (
@@ -90,6 +120,24 @@ const Page = () => {
               </span>
             </div>
           </div>
+
+          {!isSeller ? (
+            <Button
+              disabled={isLoading}
+              variant={"secondary"}
+              onClick={asSeller}
+            >
+              Continue as seller
+            </Button>
+          ) : (
+            <Button
+              variant={"secondary"}
+              disabled={isLoading}
+              onClick={asBuyer}
+            >
+              Continue as customer
+            </Button>
+          )}
         </div>
       </div>
     </div>
