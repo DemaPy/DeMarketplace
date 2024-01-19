@@ -5,6 +5,10 @@ import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import path from "path";
 import Users from "./collections/user/Users";
 import dontenv from "dotenv";
+import Products from "./collections/products/Products";
+import Media from "./collections/media/Media";
+import ProductFile from "./collections/Product files/ProductFile";
+import Order from "./collections/Orders/Order";
 
 dontenv.config({
   path: path.resolve(__dirname, "../.env"),
@@ -12,7 +16,7 @@ dontenv.config({
 
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || "",
-  collections: [Users],
+  collections: [Users, Products, Media, ProductFile, Order],
   routes: {
     admin: "/sell",
   },
