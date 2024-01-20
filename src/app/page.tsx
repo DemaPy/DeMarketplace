@@ -1,3 +1,4 @@
+import ProductReeel from "@/components/ProductReeel";
 import Wrapper from "@/components/Wrapper";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ArrowDownToLine, CheckCircle, LeafIcon } from "lucide-react";
@@ -42,7 +43,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* { List products } */}
+        <ProductReeel
+          title="New products"
+          query={{ sort: "desc", limit: 4 }}
+          href="/products"
+        />
       </Wrapper>
       <section className="border-t border-gray-200 bg-gray-50">
         <Wrapper className="py-20">
