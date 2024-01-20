@@ -43,6 +43,12 @@ const ProductListing = ({ index, product }: TProductListing) => {
     ({ value }) => value === product.category
   )?.label;
 
+  const urls = product.images
+    .map((item) =>
+      typeof item.image === "string" ? item.image : item.image.url
+    )
+    .filter(Boolean) as string[];
+
   if (isVisible && product) {
     return (
       <Link
@@ -52,7 +58,7 @@ const ProductListing = ({ index, product }: TProductListing) => {
         })}
       >
         <div className="flex flex-col w-full">
-          <ImageSlider />
+          <ImageSlider urls={urls} />
           <h3 className="mt-4 font-medium text-sm text-gray-700">
             {product.name}
           </h3>
