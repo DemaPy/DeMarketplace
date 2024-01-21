@@ -47,7 +47,7 @@ const ProductReeel = (props: TProductReeel) => {
             {title}
           </h1>
           {subtitle && (
-            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+            <h1 className="text-sm text-muted-foreground">
               {subtitle}
             </h1>
           )}

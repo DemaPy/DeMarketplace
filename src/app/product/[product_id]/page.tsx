@@ -1,8 +1,11 @@
+import AddToCartButton from "@/components/AddToCartButton";
+import ImageSlider from "@/components/ImageSlider";
+import ProductReeel from "@/components/ProductReeel";
 import Wrapper from "@/components/Wrapper";
 import { PRODUCT_CATEGORIES } from "@/config";
 import { getPayloadClient } from "@/get-payload";
 import { formatPrice } from "@/lib/utils";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, Shield } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
@@ -47,6 +50,12 @@ const page = async ({
   const label = PRODUCT_CATEGORIES.find(
     ({ value }) => value === product.category
   )?.label;
+
+  const urls = product.images
+    .map((item) =>
+      typeof item.image === "string" ? item.image : item.image.url
+    )
+    .filter(Boolean) as string[];
 
   return (
     <Wrapper>
@@ -100,8 +109,37 @@ const page = async ({
               </div>
             </section>
           </div>
+
+          <div className="mt-10 lg:col-start-2 lg:row-span-2 lg:mt-0 lg:self-center">
+            <div className="aspect-square rounded-lg">
+              <ImageSlider urls={urls} />
+            </div>
+          </div>
+
+          <div className="mt-10 lg:col-start-1 lg:row-start-2 lg:max-w-lg lf:self-start">
+            <div>
+              <div className="mt-10">
+                <AddToCartButton product={product} />
+              </div>
+              <div className="mt-6 text-center">
+                <div className="group inline-flex text-sm">
+                  <Shield className="mr-2 h-4 w-4 flex-shrink-0 text-gray-400" />
+                  <span className="text-muted-foreground hover:text-gray-700">
+                    30 Day Return Guarantees
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      <ProductReeel
+        href="/products"
+        query={{ category: product.category, limit: 4 }}
+        title={`Similar ${label}`}
+        subtitle={`Browse high quality ${label} just like ${product.name}`}
+      />
     </Wrapper>
   );
 };
