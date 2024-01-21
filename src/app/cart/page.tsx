@@ -4,21 +4,39 @@ import { Button } from "@/components/ui/button";
 import { PRODUCT_CATEGORIES } from "@/config";
 import { useCart } from "@/hooks/useCart";
 import { cn, formatPrice } from "@/lib/utils";
-import { Check, X } from "lucide-react";
+import { trpc } from "@/trpc/client";
+import { Check, Loader2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 type TCart = {};
 
 const Page = ({}: TCart) => {
+  const router = useRouter();
   const { items, removeItem } = useCart();
-
+  const { mutate: createChckoutSession, isLoading } =
+    trpc.payment.createSession.useMutation({
+      onSuccess: ({ url }) => {
+        if (url) {
+          router.push(url);
+        }
+      },
+    });
   const [isMounted, setMounted] = useState(false);
+
+  const productIds = items.map((item) => item.product.id);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const cartTotal = items.reduce((total, { product }) => {
+    return total + product.price;
+  }, 0);
+
+  const fee = 1;
 
   return (
     <div className="bg-white">
@@ -106,7 +124,7 @@ const Page = ({}: TCart) => {
                           </div>
 
                           <div className="mt-4 sm:mt-0 sm:pr-2 max-w-20">
-                            <div className="absolute r-0 t-0">
+                            <div>
                               <Button
                                 aria-label="remove product"
                                 onClick={() => removeItem(product.id)}
@@ -129,6 +147,61 @@ const Page = ({}: TCart) => {
                 })}
             </ul>
           </div>
+
+          <section className="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
+            <h2 className="text-lg font-medium text-gray-900">Order summary</h2>
+
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">Subtotal</p>
+                <p className="text-sm text-gray-900 font-medium">
+                  {isMounted ? (
+                    formatPrice(cartTotal)
+                  ) : (
+                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                  )}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <span>Flat transaction Fee</span>
+                </div>
+                <div className="text-sm font-medium text-gray-900">
+                  {isMounted ? (
+                    formatPrice(fee)
+                  ) : (
+                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+                <div className="text-base font-medium text-gray-900">
+                  Order total
+                </div>
+                <div className="text-base font-medium text-gray-900">
+                  {isMounted ? (
+                    formatPrice(cartTotal + fee)
+                  ) : (
+                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <Button
+                disabled={items.length === 0 || isLoading}
+                onClick={() => createChckoutSession({ productIds })}
+                className="w-full"
+                size={"lg"}
+              >
+                {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                Checkout
+              </Button>
+            </div>
+          </section>
         </div>
       </div>
     </div>

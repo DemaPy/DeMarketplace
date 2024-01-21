@@ -1,7 +1,6 @@
 import { AuthForm } from "../lib/validators/account-credentials";
 import { publicProcedure, router } from "./trpc";
 import { getPayloadClient } from "../get-payload";
-import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 
 export const authRouter = router({

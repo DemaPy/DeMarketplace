@@ -4,8 +4,10 @@ import { publicProcedure, router } from "./trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { QueryValidator } from "../lib/validators/QueryValidator";
+import { payment } from "./payment";
 
 export const appRouter = router({
+  payment: payment,
   auth: authRouter,
   users: publicProcedure.query(() => {
     return "hello";
