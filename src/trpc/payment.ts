@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { privateProcedure, router } from "./trpc";
+import { privateProcedure, publicProcedure, router } from "./trpc";
 import { z } from "zod";
 import { getPayloadClient } from "../get-payload";
 import { stripe } from "../lib/stripe";
@@ -37,7 +37,7 @@ export const payment = router({
         collection: "orders",
         data: {
           isPaid: false,
-          products: filteredProducts.map(item => item.id),
+          products: filteredProducts.map((item) => item.id),
           user: user.id,
         },
       });
@@ -80,5 +80,35 @@ export const payment = router({
         console.error(error);
         return { url: null };
       }
+    }),
+  pollOrderStatus: publicProcedure
+    .input(
+      z.object({
+        orderId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const { orderId } = input;
+
+      const payload = await getPayloadClient();
+
+      const { docs: orders } = await payload.find({
+        collection: "orders",
+        where: {
+          id: {
+            equals: orderId,
+          },
+        },
+      });
+
+      if (!orders.length) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const [order] = orders;
+
+      return {
+        isPaid: order.isPaid,
+      };
     }),
 });
