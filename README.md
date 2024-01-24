@@ -8,3 +8,9 @@
 
 # Products page
 ![image](https://github.com/DemaPy/DeMarketplace/assets/80632445/4462d94f-c053-4390-96ea-e2e628f8ff6f)
+
+# Manage your assets
+![image](https://github.com/DemaPy/DeMarketplace/assets/80632445/0a443a98-facf-4dee-ba16-040f8dafcf6a)
+
+# Only high quality assets approved by admins
+![image](https://github.com/DemaPy/DeMarketplace/assets/80632445/6392551d-caf1-4421-aae3-38375b9ea4b1)
