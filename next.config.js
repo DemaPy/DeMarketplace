@@ -4,9 +4,11 @@ const nextConfig = {
     remotePatterns: [
       {
         hostname: "localhost",
-        pathname: "**",
-        port: "3000",
         protocol: "http",
+      },
+      {
+        hostname: "demarketplace-production.up.railway.app",
+        protocol: "https",
       },
     ],
   },
