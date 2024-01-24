@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { twMerge } from "tailwind-merge";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { User } from "../payload-types";
+import { Metadata } from "next";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -47,3 +48,46 @@ export const getServerSideUser = async (
 
   return { user };
 };
+
+export function constructMetadata({
+  title = "Demarket - the marketplace for digital assets",
+  description = "Demarket is an open-source marketplace for digital goods.",
+  image = "/thumbnail.png",
+  icons = "/favicon.ico",
+  noIndex = false,
+}: {
+  title?: string;
+  description?: string;
+  image?: string;
+  icons?: string;
+  noIndex?: boolean;
+} = {}): Metadata {
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: image,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+      creator: "@joshtriedcoding",
+    },
+    icons,
+    metadataBase: new URL("https://digitalhippo.up.railway.app"),
+    ...(noIndex && {
+      robots: {
+        index: false,
+        follow: false,
+      },
+    }),
+  };
+}

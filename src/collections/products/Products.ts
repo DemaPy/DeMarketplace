@@ -1,13 +1,81 @@
-import { BeforeChangeHook } from "payload/dist/collections/config/types";
+import {
+  AfterChangeHook,
+  BeforeChangeHook,
+} from "payload/dist/collections/config/types";
 import { PRODUCT_CATEGORIES } from "../../config";
-import { CollectionConfig } from "payload/types";
+import { Access, CollectionConfig } from "payload/types";
 import { Product, ProductFile } from "../../payload-types";
 import { stripe } from "../../lib/stripe";
+import { User } from "payload/dist/auth";
+
+const isAdminOrHasAccess =
+  (): Access =>
+  ({ req: { user } }) => {
+    const u = user as User | undefined;
+
+    if (!user) {
+      return false;
+    }
+
+    if (user.role === "admin") return true;
+
+    const userProductIds = (user.products || []).reduce(
+      (acc: string[], product: { id: any }) => {
+        if (!product) return acc;
+
+        if (typeof product === "string") {
+          acc.push(product);
+        } else {
+          acc.push(product.id);
+        }
+
+        return acc;
+      },
+      []
+    );
+
+    return {
+      id: {
+        in: userProductIds,
+      },
+    };
+  };
 
 const addUser: BeforeChangeHook<ProductFile> = async ({ req, data }) => {
   const user = req.user;
 
   return { ...data, user: user.id };
+};
+
+const syncUser: AfterChangeHook<Product> = async ({ req, doc }) => {
+  const fullUser = await req.payload.findByID({
+    collection: "users",
+    id: req.user.id,
+  });
+
+  if (fullUser && typeof fullUser === "object") {
+    const { products } = fullUser;
+
+    const allIds = [
+      ...(products?.map((item) =>
+        typeof item === "object" ? item.id : item
+      ) || []),
+    ];
+
+    const createdProductIds = allIds.filter(
+      (id, index) => allIds.indexOf(id) === index
+    );
+
+    const dataToUpdate = [...createdProductIds, doc.id];
+
+    await req.payload.update({
+      collection: "users",
+      id: fullUser.id,
+      data: {
+        products: dataToUpdate,
+      },
+    });
+  }
 };
 
 const Products: CollectionConfig = {
@@ -16,8 +84,9 @@ const Products: CollectionConfig = {
     useAsTitle: "name",
   },
   access: {
-    read: () => true,
-    create: () => true,
+    read: isAdminOrHasAccess(),
+    create: isAdminOrHasAccess(),
+    delete: isAdminOrHasAccess(),
   },
   hooks: {
     beforeChange: [
@@ -59,6 +128,7 @@ const Products: CollectionConfig = {
         }
       },
     ],
+    afterChange: [syncUser],
   },
   fields: [
     {
