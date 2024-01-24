@@ -8,10 +8,11 @@ import Cart from "./Cart";
 import { getServerSideUser } from "@/lib/utils";
 import { cookies } from "next/headers";
 import UserAccountNav from "./UserAccountNav";
+import MobileNavBar from "./MobileNavbar";
 
 const Navbar = async () => {
   const nextCookies = cookies();
-  const {user} = await getServerSideUser(nextCookies);
+  const { user } = await getServerSideUser(nextCookies);
 
   return (
     <div className="mg-white sticky top-0 z-50 inset-x-0 h-16">
@@ -20,6 +21,7 @@ const Navbar = async () => {
           <div className="border-b border-gray-200">
             <div className="flex h-16 items-center">
               {/* TODO: mobile nav */}
+              <MobileNavBar />
               <div className="ml-4 flex lg:ml-0">
                 <Link href={"/"}>
                   <Icons.logo className="h-10 w-10" />
